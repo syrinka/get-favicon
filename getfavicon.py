@@ -38,8 +38,8 @@ async def get_favicon_blob(url, **kw) -> bytes:
         b64 = url.split(',', 1)[1]
         return b64decode(b64)
     else:
-        async with httpx.AsyncClient() as client:
-            resp = await client.get(url, **kw)
+        async with httpx.AsyncClient(**kw) as client:
+            resp = await client.get(url)
             if resp.status_code == 200:
                 return resp.content
             else:
