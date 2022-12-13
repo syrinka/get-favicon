@@ -20,7 +20,7 @@ def from_html(text: str) -> Union[str, None]:
     return None
 
 
-def get_favicon_link(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
+async def get_favicon_link(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
     link = from_html(httpx.get(url, **kw).text)
     if link is None:
         link = default
