@@ -33,7 +33,7 @@ async def get_favicon_link(url: str, default='/favicon.ico', **kw) -> Union[str,
         return urljoin(url, link)
 
 
-async def get_favicon_blob(url, **kw) -> bytes:
+async def get_favicon_blob(url, **kw) -> Union[bytes, None]:
     if url.startswith('data:image'):
         b64 = url.split(',', 1)[1]
         return b64decode(b64)
@@ -43,4 +43,4 @@ async def get_favicon_blob(url, **kw) -> bytes:
             if resp.status_code == 200:
                 return resp.content
             else:
-                return b''
+                return None

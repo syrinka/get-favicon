@@ -1,50 +1,40 @@
-import os
-
 from flask import Flask, request, Response
-from hashlib import md5
-from pathlib import Path
-
 from getfavicon import get_favicon_link, get_favicon_blob
+
+from config import config
+from store import get_store
 
 
 app = Flask(__name__)
-
-cache = Path(__file__).parent / 'cache'
-
-
-def get_path(url: str) -> Path:
-    m = md5(url.encode()).hexdigest()
-    return cache / m[:2] / m[2:4] / m[4:]
+store = get_store()
 
 
 async def get_favicon(url):
-    path = get_path(url)
-    if path.exists():
-        blob = open(path, 'rb').read()
-        return Response(blob, mimetype='image/png')
-
-    kw = {
-        'proxies': {'all://': 'http://127.0.0.1:7890'}
-    }
-    icon_url = await get_favicon_link(url, **kw)
-    blob = await get_favicon_blob(icon_url, **kw)
+    if store.exists(url):
+        blob = store.get(url)
+    else:
+        kw = {
+            'proxies': {'all://': 'http://127.0.0.1:7890'}
+        }
+        icon_url = await get_favicon_link(url, **kw)
+        print(icon_url)
+        blob = await get_favicon_blob(icon_url, **kw)
+        store.set(url, blob)
 
     if not blob:
-        return blob
+        return Response(status=404)
     else:
-        os.makedirs(path.parent, exist_ok=True)
-        path.write_bytes(blob)
-        return Response(blob, mimetype='image/png')
+        return Response(blob, content_type='image/png')
 
 
 @app.route('/')
 async def root():
     url = request.args.get('url')
     if url is None:
-        return ''
+        return Response(status=400)
     else:
         return await get_favicon(url)
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
