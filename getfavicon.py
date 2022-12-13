@@ -1,4 +1,5 @@
 from typing import Union
+from base64 import b64decode
 
 import httpx
 from lxml.etree import HTML
@@ -19,7 +20,7 @@ def from_html(text: str) -> Union[str, None]:
     return None
 
 
-def from_url(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
+def get_favicon_link(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
     link = from_html(httpx.get(url, **kw).text)
     if link is None:
         link = default
@@ -30,3 +31,16 @@ def from_url(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
         return link
     else:
         return urljoin(url, link)
+
+
+async def get_favicon_blob(url, **kw) -> bytes:
+    if url.startswith('data:image'):
+        b64 = url.split(',', 1)[1]
+        return b64decode(b64)
+    else:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, **kw)
+            if resp.status_code == 200:
+                return resp.content
+            else:
+                return b''

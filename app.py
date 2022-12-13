@@ -6,7 +6,7 @@ from flask import Flask, request, Response
 from hashlib import md5
 from pathlib import Path
 
-from geticon import from_url
+from getfavicon import get_favicon_link
 
 
 app = Flask(__name__)
@@ -25,7 +25,7 @@ def get_favicon(url):
         blob = open(path, 'rb').read()
         return Response(blob, mimetype='image/png')
 
-    icon_url = from_url(url, proxies={'all://': 'http://127.0.0.1:7890'})
+    icon_url = get_favicon_link(url, proxies={'all://': 'http://127.0.0.1:7890'})
     if icon_url.startswith('data:image'):
         b64 = icon_url.split(',', 1)[1]
         blob = b64decode(b64)
