@@ -7,3 +7,6 @@ def get_store():
     if config.store == 'filecache':
         from .filecache import FilecacheStore
         return FilecacheStore()
+    if config.store == 'redis':
+        from .redis_ import RedisStore
+        return RedisStore()

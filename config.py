@@ -16,3 +16,4 @@ class config(object):
     assert store in ('memory', 'redis', 'filecache')
 
     lru_size = e.int('LRU_SIZE', 100)
+    redis_url = e.str('REDIS_URL', None)
