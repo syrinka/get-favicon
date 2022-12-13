@@ -17,3 +17,4 @@ class config(object):
 
     lru_size = e.int('LRU_SIZE', 100)
     redis_url = e.str('REDIS_URL', None)
+    redis_ttl = e.int('REDIS_TTL', None)
