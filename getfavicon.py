@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Tuple
 from base64 import b64decode
 
 import httpx
@@ -9,38 +9,42 @@ from urllib.parse import urljoin
 REL_LIST = ('icon', 'shortcut icon')
 
 
-def from_html(text: str) -> Union[str, None]:
-    tree = HTML(text)
+def get_href(html: str) -> Union[Tuple[str, Union[str, None]], Tuple[None, None]]:
+    tree = HTML(html)
     for e in tree.cssselect('link'):
         if 'href' not in e.attrib:
             continue
         if not e.attrib.get('rel') in REL_LIST:
             continue
-        return e.attrib['href']
-    return None
+        return e.attrib['href'], e.attrib.get('type')
+    return None, None
 
 
-async def get_favicon_link(url: str, default='/favicon.ico', **kw) -> Union[str, None]:
-    link = from_html(httpx.get(url, **kw).text)
-    if link is None:
-        link = default
-    if link is None:
-        return None
+async def get_favicon(url, **kw) -> Union[Tuple[bytes, str], None]:
+    """
+    :rtype: (bytes, str) | favicon blob and its mimetype
+    :rtype: None | if favicon resource not found
+    """
+    href, mime = get_href(httpx.get(url, **kw).text)
+    if href is None:
+        href = '/favicon.ico'
+    if mime == 'image/vnd.microsoft.icon':
+        mime = 'image/x-icon'
 
-    if link.startswith('data:image'):
-        return link
+    if href.startswith('data:image'):
+        assert mime
+        b64 = href, mime.split(',', 1)[1]
+        blob = b64decode(b64)
+
     else:
-        return urljoin(url, link)
-
-
-async def get_favicon_blob(url, **kw) -> Union[bytes, None]:
-    if url.startswith('data:image'):
-        b64 = url.split(',', 1)[1]
-        return b64decode(b64)
-    else:
+        link = urljoin(url, href)
         async with httpx.AsyncClient(**kw) as client:
-            resp = await client.get(url)
+            resp = await client.get(link)
             if resp.status_code == 200:
-                return resp.content
+                blob = resp.content
             else:
                 return None
+            if mime is None:
+                mime = resp.headers['content-type'] or 'image/png'
+
+    return blob, mime
