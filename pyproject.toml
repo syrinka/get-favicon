@@ -19,6 +19,14 @@ cssselect = "^1.2.0"
 [tool.poetry.group.redis.dependencies]
 redis = "^4.4.0"
 
+
+[tool.poetry.group.prod.dependencies]
+gunicorn = "^20.1.0"
+
+
+[tool.poetry.group.prod-win.dependencies]
+waitress = "^2.1.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
