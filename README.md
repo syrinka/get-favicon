@@ -1,3 +1,9 @@
+## Usage
+
+- `poetry install`
+- `flask run`
+- `curl http://127.0.0.1:5000/?url=...`
+
 ## 数据存储
 
 通过环境变量 `STORE` 指定
