@@ -1,12 +1,7 @@
 from environs import Env
 
 
-__all__ = [
-    'store',
-    'lru_size',
-    'redis_url',
-    'filecache_path'
-]
+__all__ = ['config']
 
 e = Env()
 e.read_env()
