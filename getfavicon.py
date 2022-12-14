@@ -3,7 +3,6 @@ from base64 import b64decode
 
 import httpx
 from lxml.etree import HTML
-from urllib.parse import urljoin
 
 
 REL_LIST = ('icon', 'shortcut icon')
@@ -14,9 +13,8 @@ def get_href(html: str) -> Union[Tuple[str, Union[str, None]], Tuple[None, None]
     for e in tree.cssselect('link'):
         if 'href' not in e.attrib:
             continue
-        if not e.attrib.get('rel') in REL_LIST:
-            continue
-        return e.attrib['href'], e.attrib.get('type')
+        if e.attrib.get('rel') in REL_LIST:
+            return e.attrib['href'], e.attrib.get('type')
     return None, None
 
 
@@ -25,7 +23,9 @@ async def get_favicon(url, **kw) -> Union[Tuple[bytes, str], None]:
     :rtype: (bytes, str) | favicon blob and its mimetype
     :rtype: None | if favicon resource not found
     """
-    href, mime = get_href(httpx.get(url, **kw).text)
+    resp = httpx.get(url, **kw)
+    base_url = resp.url
+    href, mime = get_href(resp.text)
     if href is None:
         href = '/favicon.ico'
     if mime == 'image/vnd.microsoft.icon':
@@ -37,7 +37,7 @@ async def get_favicon(url, **kw) -> Union[Tuple[bytes, str], None]:
         blob = b64decode(b64)
 
     else:
-        link = urljoin(url, href)
+        link = base_url.join(href)
         async with httpx.AsyncClient(**kw) as client:
             resp = await client.get(link)
             if resp.status_code == 200:
