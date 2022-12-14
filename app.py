@@ -14,10 +14,7 @@ async def get(url):
         data = store.get(url)
         mime, blob = data[:13].rstrip().decode(), data[13:]
     else:
-        kw = {
-            'proxies': {'all://': 'http://127.0.0.1:7890'}
-        }
-        blob, mime = await get_favicon(url, **kw)
+        blob, mime = await get_favicon(url, **config.request_kw)
 
         # image/gif
         # image/png

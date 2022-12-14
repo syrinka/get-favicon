@@ -3,4 +3,5 @@
 /cache/
 /.venv/
 
+.env
 poetry.lock
