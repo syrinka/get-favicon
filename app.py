@@ -14,7 +14,11 @@ async def get(url):
         data = store.get(url)
         mime, blob = data[:13].rstrip().decode(), data[13:]
     else:
-        blob, mime = await get_favicon(url, **config.request_kw)
+        try:
+            blob, mime = await get_favicon(url, **config.request_kw)
+        except TypeError:
+            # cannot unpack non-iterable NoneType object
+            return Response(status=404)
 
         # image/gif
         # image/png
@@ -23,10 +27,7 @@ async def get(url):
         data = mime.encode().ljust(13) + blob
         store.set(url, data)
 
-    if not blob:
-        return Response(status=404)
-    else:
-        return Response(blob, content_type=mime, mimetype=mime)
+    return Response(blob, content_type=mime, mimetype=mime)
 
 
 @app.route('/')
