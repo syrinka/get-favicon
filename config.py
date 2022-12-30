@@ -14,4 +14,4 @@ class config(object):
     redis_url = e.str('REDIS_URL', None)
     redis_ttl = e.int('REDIS_TTL', None)
 
-    request_kw = e.json('REQUEST_KW', {})
+    request_kw = e.json('REQUEST_KW', r'{}')
