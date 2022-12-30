@@ -4,16 +4,15 @@
 - `flask run`
 - `curl http://127.0.0.1:5000/?url=...`
 
-## 数据存储
+### In prod environment
 
-通过环境变量 `STORE` 指定
+- `poetry install --with=prod` / `poetry install --with=prod-win`
+- `gunicorn app:app` / `waitresss-serve app:app`
 
-### memory
+## Configurations
 
-存储在内存中，重启后数据清空
-
-### redis
-
-存储在 Redis 中，相关环境变量：`REDIS_URL`、`REDIS_TTL`
-
-### filecache
+- `STORE: Literal['memory', 'redis', 'filecache'] = 'memory'`
+- `LRU_SIZE: int = 100`
+- `REDIS_URL: str`
+- `REDIS_TTL: int`
+- `REQUEST_KW: dict` # in json format
